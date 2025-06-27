@@ -70,16 +70,38 @@ export default function Preview() {
     );
   }
 
+  const allFields = Object.keys(portfolio);
+  const customFields = portfolio.customFields || [];
+
   return (
-    <div className={`min-vh-100 py-5 px-3 ${theme.mode === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'}`}>
+    <div
+      className={`min-vh-100 py-5 px-3 ${
+        theme.mode === 'dark' ? 'bg-dark text-white' : 'bg-light text-dark'
+      }`}
+    >
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="container"
       >
-        <SelectedDesign data={portfolio} activeFields={Object.keys(portfolio)} />
+        {/* Standard Preview */}
+        <SelectedDesign data={portfolio} activeFields={allFields} />
 
+        {/* Render Custom Sections (if any) */}
+        {customFields.length > 0 && (
+          <div className="mt-5">
+            <h3 className={`${textColor[color]} fw-bold mb-3`}>📌 Custom Sections</h3>
+            {customFields.map((field, index) => (
+              <div key={index} className="mb-4">
+                <h5 className="fw-semibold text-capitalize">{field}</h5>
+                <p>{portfolio[field]}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Actions */}
         <div className="mt-4 d-flex gap-3 flex-wrap">
           <Link to={`/export/${portfolio.id}`} className={`btn ${buttonBg[color]}`}>
             Export as PDF

@@ -1,24 +1,32 @@
 import React from 'react';
 
 export default function Webdesignone({ data, activeFields }) {
+  const builtInFields = [
+    'name', 'about', 'skills', 'projects',
+    'experience', 'testimonials', 'blogArticles',
+    'linkedin', 'github',
+  ];
+
   return (
     <div
       className="p-5 rounded shadow-lg text-white"
       style={{ background: 'linear-gradient(to right, #141e30, #243b55)' }}
     >
       {/* Hero Section */}
-      {activeFields.includes('name') || activeFields.includes('about') ? (
+      {(activeFields.includes('name') || activeFields.includes('about')) && (
         <header className="mb-5 text-center">
-          <h1 className="display-4 fw-bold text-uppercase">
-            {data.name || 'Your Name'}
-          </h1>
+          {activeFields.includes('name') && (
+            <h1 className="display-4 fw-bold text-uppercase">
+              {data.name || 'Your Name'}
+            </h1>
+          )}
           {activeFields.includes('about') && (
             <p className="fs-5 fst-italic">
               {data.about || 'A passionate developer crafting web experiences.'}
             </p>
           )}
         </header>
-      ) : null}
+      )}
 
       {/* Skills Section */}
       {activeFields.includes('skills') && data.skills && (
@@ -64,8 +72,7 @@ export default function Webdesignone({ data, activeFields }) {
           </h2>
           <blockquote className="blockquote">
             <p className="mb-2">
-              {data.testimonials ||
-                `"Highly professional, delivered beyond expectations."`}
+              {data.testimonials || `"Highly professional, delivered beyond expectations."`}
             </p>
             <footer className="blockquote-footer text-light">
               — Jane Smith, CEO of BrightTech
@@ -120,6 +127,18 @@ export default function Webdesignone({ data, activeFields }) {
             </div>
           </section>
         )}
+
+      {/* ✅ Custom Fields Renderer */}
+      {activeFields
+        .filter((field) => !builtInFields.includes(field))
+        .map((field) => (
+          <section key={field} className="mb-5">
+            <h2 className="h5 fw-bold text-uppercase border-bottom border-light pb-2 mb-2">
+              {field.replace(/([A-Z])/g, ' $1').toUpperCase()}
+            </h2>
+            <p>{data[field]}</p>
+          </section>
+        ))}
 
       {/* Footer */}
       {activeFields.includes('name') && (

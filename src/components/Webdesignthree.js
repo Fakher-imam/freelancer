@@ -1,17 +1,25 @@
 import React from 'react';
 
 export default function Webdesignthree({ data, activeFields }) {
+  const builtInFields = [
+    'name', 'about', 'skills', 'projects',
+    'experience', 'testimonials', 'blogArticles',
+    'linkedin', 'github',
+  ];
+
   return (
     <div className="p-5 rounded shadow-lg text-white" style={{ background: 'linear-gradient(to right, #000000, #434343)' }}>
       {/* Hero */}
-      {activeFields.includes('name') || activeFields.includes('about') ? (
+      {(activeFields.includes('name') || activeFields.includes('about')) && (
         <header className="mb-5 text-center">
-          <h1 className="display-4 fw-bold text-uppercase">{data.name || 'Your Name'}</h1>
+          {activeFields.includes('name') && (
+            <h1 className="display-4 fw-bold text-uppercase">{data.name || 'Your Name'}</h1>
+          )}
           {activeFields.includes('about') && (
             <p className="fs-5 fst-italic">{data.about || 'A skilled developer with a passion for building digital solutions.'}</p>
           )}
         </header>
-      ) : null}
+      )}
 
       {/* Skills */}
       {activeFields.includes('skills') && data.skills && (
@@ -79,6 +87,18 @@ export default function Webdesignthree({ data, activeFields }) {
           </div>
         </section>
       )}
+
+      {/* ✅ Dynamic Custom Fields */}
+      {activeFields
+        .filter((field) => !builtInFields.includes(field))
+        .map((field) => (
+          <section key={field} className="mb-5">
+            <h2 className="h5 fw-bold text-uppercase border-bottom border-light pb-2 mb-2">
+              {field.replace(/([A-Z])/g, ' $1').toUpperCase()}
+            </h2>
+            <p>{data[field]}</p>
+          </section>
+        ))}
 
       {/* Footer */}
       {activeFields.includes('name') && (

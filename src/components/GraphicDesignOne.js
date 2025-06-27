@@ -1,13 +1,19 @@
 import React from 'react';
 
 export default function GraphicDesignOne({ data, activeFields }) {
+  const builtInFields = ['name', 'about', 'skills', 'projects', 'linkedin', 'github'];
+
   return (
     <div className="p-5 rounded shadow-lg text-white" style={{ background: 'linear-gradient(to right, #ff5f6d, #ffc371)' }}>
       {/* Hero */}
       {(activeFields.includes('name') || activeFields.includes('about')) && (
         <header className="mb-5 text-center">
-          <h1 className="display-4 fw-bold text-uppercase">{data.name || 'Your Name'}</h1>
-          <p className="fs-5 fst-italic">{data.about || 'Creative Graphic Designer with an artistic flair.'}</p>
+          {activeFields.includes('name') && (
+            <h1 className="display-4 fw-bold text-uppercase">{data.name || 'Your Name'}</h1>
+          )}
+          {activeFields.includes('about') && (
+            <p className="fs-5 fst-italic">{data.about || 'Creative Graphic Designer with an artistic flair.'}</p>
+          )}
         </header>
       )}
 
@@ -30,6 +36,16 @@ export default function GraphicDesignOne({ data, activeFields }) {
           <p>{data.projects}</p>
         </section>
       )}
+
+      {/* ✅ Dynamic Custom Fields */}
+      {activeFields
+        .filter((field) => !builtInFields.includes(field))
+        .map((field) => (
+          <section key={field} className="mb-4">
+            <h2 className="h6 border-bottom pb-1 mb-2 text-uppercase">{field.replace(/([A-Z])/g, ' $1')}</h2>
+            <p>{data[field]}</p>
+          </section>
+        ))}
 
       {/* CTA */}
       {(activeFields.includes('linkedin') || activeFields.includes('github')) && (

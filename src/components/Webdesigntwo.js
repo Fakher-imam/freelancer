@@ -1,17 +1,29 @@
 import React from 'react';
 
 export default function Webdesigntwo({ data, activeFields }) {
+  const builtInFields = [
+    'name', 'about', 'skills', 'projects',
+    'experience', 'testimonials', 'blogArticles',
+    'linkedin', 'github',
+  ];
+
   return (
-    <div className="p-5 rounded shadow-lg text-white" style={{ background: 'linear-gradient(to right, #434343, #000000)' }}>
-      
+    <div
+      className="p-5 rounded shadow-lg text-white"
+      style={{ background: 'linear-gradient(to right, #434343, #000000)' }}
+    >
       {/* Hero Section */}
       {(activeFields.includes('name') || activeFields.includes('about')) && (
         <header className="mb-5 text-center">
           {activeFields.includes('name') && (
-            <h1 className="display-4 fw-bold text-uppercase">{data.name || 'Your Name'}</h1>
+            <h1 className="display-4 fw-bold text-uppercase">
+              {data.name || 'Your Name'}
+            </h1>
           )}
           {activeFields.includes('about') && (
-            <p className="fs-5 fst-italic">{data.about || 'Web developer passionate about frontend and backend technologies.'}</p>
+            <p className="fs-5 fst-italic">
+              {data.about || 'Web developer passionate about frontend and backend technologies.'}
+            </p>
           )}
         </header>
       )}
@@ -68,20 +80,47 @@ export default function Webdesigntwo({ data, activeFields }) {
       )}
 
       {/* CTA */}
-      {(activeFields.includes('linkedin') || activeFields.includes('github')) && (data.linkedin || data.github) && (
-        <section className="text-center bg-dark p-4 rounded border border-light">
-          <h3 className="mb-2 fw-bold text-uppercase">Let’s Connect</h3>
-          <p className="mb-3">Open to exciting opportunities and collaborations!</p>
-          <div>
-            {activeFields.includes('linkedin') && data.linkedin && (
-              <a href={data.linkedin} target="_blank" rel="noreferrer" className="btn btn-outline-light me-3">LinkedIn</a>
-            )}
-            {activeFields.includes('github') && data.github && (
-              <a href={data.github} target="_blank" rel="noreferrer" className="btn btn-outline-light">GitHub</a>
-            )}
-          </div>
-        </section>
-      )}
+      {(activeFields.includes('linkedin') || activeFields.includes('github')) &&
+        (data.linkedin || data.github) && (
+          <section className="text-center bg-dark p-4 rounded border border-light">
+            <h3 className="mb-2 fw-bold text-uppercase">Let’s Connect</h3>
+            <p className="mb-3">Open to exciting opportunities and collaborations!</p>
+            <div>
+              {activeFields.includes('linkedin') && data.linkedin && (
+                <a
+                  href={data.linkedin}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn btn-outline-light me-3"
+                >
+                  LinkedIn
+                </a>
+              )}
+              {activeFields.includes('github') && data.github && (
+                <a
+                  href={data.github}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn btn-outline-light"
+                >
+                  GitHub
+                </a>
+              )}
+            </div>
+          </section>
+        )}
+
+      {/* ✅ Custom Fields Renderer */}
+      {activeFields
+        .filter((field) => !builtInFields.includes(field))
+        .map((field) => (
+          <section key={field} className="mb-5">
+            <h2 className="h5 fw-bold text-uppercase border-bottom border-light pb-2 mb-2">
+              {field.replace(/([A-Z])/g, ' $1').toUpperCase()}
+            </h2>
+            <p>{data[field]}</p>
+          </section>
+        ))}
 
       {/* Footer */}
       {activeFields.includes('name') && (

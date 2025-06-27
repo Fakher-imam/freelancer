@@ -16,6 +16,7 @@ export default function Editor() {
   const navigate = useNavigate();
   const { id, design } = useParams();
   const [template, setTemplate] = useState('');
+  const [customFields, setCustomFields] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     about: '',
@@ -32,39 +33,6 @@ export default function Editor() {
       mode: 'light',
     },
   });
-
-  useEffect(() => {
-    const pending = localStorage.getItem('pendingTemplate');
-    if (pending && !design) {
-      navigate(`/editor/${pending}`);
-      localStorage.removeItem('pendingTemplate');
-      return;
-    }
-
-    const saved = JSON.parse(localStorage.getItem('portfolios') || '[]');
-    const found = saved.find((p) => p.id === id);
-
-    if (found) {
-      setFormData(found);
-      setTemplate(found.template);
-      if (!design && found.design) {
-        navigate(`/editor/${found.template}/${found.design}`);
-        return;
-      }
-    } else if (id?.includes('/')) {
-      const [t, d] = id.split('/');
-      setTemplate(t);
-      navigate(`/editor/${t}/${d}`);
-    } else {
-      setTemplate(id);
-    }
-  }, [id, design, navigate]);
-
-  const templateThemes = {
-    web: 'linear-gradient(135deg, #1f4037, #99f2c8)',
-    graphic: 'linear-gradient(135deg, #fc466b, #3f5efb)',
-    blogger: 'linear-gradient(135deg, #000428, #004e92)',
-  };
 
   const designMap = {
     web: {
@@ -105,6 +73,35 @@ export default function Editor() {
   const availableDesigns = Object.keys(designMap[template] || {});
   const SelectedDesign = designMap[template]?.[design] || null;
   const activeFields = designFields?.[template]?.[design] || [];
+  const allFields = [...activeFields, ...customFields];
+
+  useEffect(() => {
+    const pending = localStorage.getItem('pendingTemplate');
+    if (pending && !design) {
+      navigate(`/editor/${pending}`);
+      localStorage.removeItem('pendingTemplate');
+      return;
+    }
+
+    const saved = JSON.parse(localStorage.getItem('portfolios') || '[]');
+    const found = saved.find((p) => p.id === id);
+
+    if (found) {
+      setFormData(found);
+      setTemplate(found.template);
+      setCustomFields(found.customFields || []);
+      if (!design && found.design) {
+        navigate(`/editor/${found.template}/${found.design}`);
+        return;
+      }
+    } else if (id?.includes('/')) {
+      const [t, d] = id.split('/');
+      setTemplate(t);
+      navigate(`/editor/${t}/${d}`);
+    } else {
+      setTemplate(id);
+    }
+  }, [id, design, navigate]);
 
   useEffect(() => {
     if (!formData.name && template) {
@@ -144,12 +141,16 @@ export default function Editor() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleAddField = () => {
+    const fieldName = prompt('Enter name of the new section:');
+    if (!fieldName || formData[fieldName]) return;
+    setCustomFields(prev => [...prev, fieldName]);
+    setFormData(prev => ({ ...prev, [fieldName]: '' }));
+  };
+
   const handleSave = () => {
     const currentUser = JSON.parse(localStorage.getItem('user'));
-    if (!currentUser) {
-      alert("User not logged in!");
-      return;
-    }
+    if (!currentUser) return alert("User not logged in!");
 
     const saved = JSON.parse(localStorage.getItem('portfolios') || '[]');
     const newPortfolio = {
@@ -157,6 +158,7 @@ export default function Editor() {
       template,
       design,
       userEmail: currentUser.email,
+      customFields,
       ...formData,
     };
 
@@ -165,79 +167,70 @@ export default function Editor() {
     navigate('/dashboard');
   };
 
-  const bg = templateThemes[template] || '#f8f9fa';
+  const bg = {
+    web: 'linear-gradient(135deg, #1f4037, #99f2c8)',
+    graphic: 'linear-gradient(135deg, #fc466b, #3f5efb)',
+    blogger: 'linear-gradient(135deg, #000428, #004e92)',
+  }[template] || '#f8f9fa';
 
- if (!design && template) {
+  if (!design && template) {
+    return (
+      <div className="min-vh-100 py-5 px-4 text-white" style={{ background: bg }}>
+        <div className="container text-center">
+          <h2 className="fw-bold mb-4">Select a Design for {template}</h2>
+          <div className="d-flex justify-content-center gap-3 flex-wrap">
+            {availableDesigns.map((d) => (
+              <button key={d} className="btn btn-outline-light px-4 py-2" onClick={() => navigate(`/editor/${template}/${d}`)}>
+                {d.replace('design-', 'Design ')}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-vh-100 py-5 px-4 text-white" style={{ background: bg }}>
-      <div className="container text-center">
-        <h2 className="fw-bold mb-4">
-          Select a Design for {template?.charAt(0).toUpperCase() + template?.slice(1)} Portfolio
-        </h2>
-        <div className="d-flex justify-content-center gap-3 flex-wrap">
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="container">
+        <h1 className="mb-4 fw-bold">{id === 'new' ? 'Create' : 'Edit'} Portfolio - {design}</h1>
+
+        <div className="mb-4">
+          <h5 className="fw-semibold">Choose Design</h5>
           {availableDesigns.map((d) => (
             <button
               key={d}
-              className="btn btn-outline-light px-4 py-2"
+              className={`btn btn-sm me-2 ${design === d ? 'btn-primary' : 'btn-outline-light'}`}
               onClick={() => navigate(`/editor/${template}/${d}`)}
             >
               {d.replace('design-', 'Design ')}
             </button>
           ))}
         </div>
-      </div>
-    </div>
-  );
-}
-
-
-  return (
-    <div className="min-vh-100 py-5 px-4 text-white" style={{ background: bg }}>
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="container">
-        <h1 className="mb-4 fw-bold">
-          {id === 'new' ? 'Create' : 'Edit'} Portfolio - {design}
-        </h1>
-
-        
-          <div className="mb-4">
-            <h5 className="fw-semibold">Choose Design</h5>
-            {availableDesigns.map((d) => (
-              <button
-                key={d}
-                className={`btn btn-sm me-2 ${design === d ? 'btn-primary' : 'btn-outline-light'}`}
-                onClick={() => navigate(`/editor/${template}/${d}`)}
-              >
-                {d.replace('design-', 'Design ')}
-              </button>
-            ))}
-          </div>
-       
 
         <div className="row g-4">
           <div className="col-md-6">
-            {activeFields.map((field) => {
-              const type = field.includes('about') || field.includes('experience') || field.includes('testimonials') || field.includes('blogArticles')
-                ? 'textarea' : 'input';
-              return type === 'textarea' ? (
+            {allFields.map((field) => {
+              const isTextarea = ['about', 'experience', 'testimonials', 'blogArticles'].includes(field) || customFields.includes(field);
+              return isTextarea ? (
                 <textarea key={field} name={field} value={formData[field]} onChange={handleChange} placeholder={field} rows={3} className="form-control mb-3" />
               ) : (
                 <input key={field} name={field} value={formData[field]} onChange={handleChange} placeholder={field} className="form-control mb-3" />
               );
             })}
 
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              whileHover={{ scale: 1.05 }}
-              onClick={handleSave}
-              className="btn btn-light text-dark fw-bold w-100"
-            >
+            <button className="btn btn-outline-light w-100 mb-3" onClick={handleAddField}>
+              ➕ Add Custom Section
+            </button>
+
+            <motion.button whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.05 }} onClick={handleSave} className="btn btn-light text-dark fw-bold w-100">
               Save Portfolio
             </motion.button>
           </div>
 
           <div className="col-md-6">
             {SelectedDesign ? (
-              <SelectedDesign data={formData} activeFields={activeFields} />
+              <SelectedDesign data={formData} activeFields={allFields} />
             ) : (
               <p className="text-light">Preview not available.</p>
             )}
